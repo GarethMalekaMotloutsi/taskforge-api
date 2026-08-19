@@ -14,6 +14,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/tasks", taskRoutes);
 
-app.listen(PORT, () => {
-  console.log(`TaskForge API running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`TaskForge API running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
