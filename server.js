@@ -3,6 +3,7 @@ const path = require("path");
 
 const logger = require("./middleware/logger");
 const taskRoutes = require("./routes/tasks");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 const PORT = 3000;
@@ -13,6 +14,8 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/tasks", taskRoutes);
+
+app.use(errorHandler);
 
 if (require.main === module) {
   app.listen(PORT, () => {

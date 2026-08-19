@@ -3,32 +3,476 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskForge</title>
-</head>
-<body>
-  <h1>TaskForge Tasks</h1>
 
-  <ul id="tasks"></ul>
+  <title>TaskForge | Task Dashboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0b0d10;
+      color: #f5f7fa;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 32px 0 24px;
+      border-bottom: 1px solid #252a31;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #0b0d10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: 22px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand p {
+      color: #8b939f;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    main {
+      padding: 42px 0 60px;
+    }
+
+    .hero {
+      margin-bottom: 32px;
+    }
+
+    .hero h2 {
+      font-size: clamp(30px, 5vw, 48px);
+      letter-spacing: -1.8px;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: #8b939f;
+      max-width: 600px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+
+    .stat-card {
+      background: #111419;
+      border: 1px solid #252a31;
+      border-radius: 16px;
+      padding: 22px;
+    }
+
+    .stat-label {
+      color: #8b939f;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .progress-section {
+      background: #111419;
+      border: 1px solid #252a31;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 34px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .progress-header span:last-child {
+      color: #9ca3af;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #252a31;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #ffffff;
+      border-radius: inherit;
+      transition: width 0.4s ease;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-heading h3 {
+      font-size: 18px;
+    }
+
+    .section-heading span {
+      color: #707783;
+      font-size: 13px;
+    }
+
+    .tasks {
+      display: grid;
+      gap: 14px;
+    }
+
+    .task-card {
+      background: #111419;
+      border: 1px solid #252a31;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .task-card:hover {
+      border-color: #444b55;
+      transform: translateY(-2px);
+    }
+
+    .task-info {
+      min-width: 0;
+    }
+
+    .task-id {
+      color: #6f7782;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .task-title {
+      font-size: 17px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .task-date {
+      color: #737b87;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      flex-shrink: 0;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.complete {
+      background: rgba(74, 222, 128, 0.1);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .badge.pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .badge.warning {
+      background: rgba(248, 113, 113, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .empty-state {
+      color: #737b87;
+      text-align: center;
+      padding: 40px;
+      border: 1px dashed #303640;
+      border-radius: 16px;
+    }
+
+    footer {
+      border-top: 1px solid #252a31;
+      padding: 24px 0;
+      color: #626a75;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .header-content {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .task-card {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .badge {
+        align-self: flex-start;
+      }
+
+      main {
+        padding-top: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+
+      <div class="brand">
+        <div class="brand-mark">TF</div>
+
+        <div>
+          <h1>TaskForge</h1>
+          <p>Task management API dashboard</p>
+        </div>
+      </div>
+
+      <div class="status">
+        <span class="status-dot"></span>
+        API Connected
+      </div>
+
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <h2>Task Dashboard</h2>
+      <p>
+        A simple view of your TaskForge tasks, powered directly by the Express API.
+      </p>
+    </section>
+
+    <section class="stats">
+
+      <div class="stat-card">
+        <div class="stat-label">Total Tasks</div>
+        <div class="stat-value" id="totalTasks">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="completedTasks">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Outstanding</div>
+        <div class="stat-value" id="outstandingTasks">0</div>
+      </div>
+
+    </section>
+
+    <section class="progress-section">
+
+      <div class="progress-header">
+        <span>Overall progress</span>
+        <span id="progressText">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+    </section>
+
+    <section>
+
+      <div class="section-heading">
+        <h3>Tasks</h3>
+        <span id="taskCount">0 tasks</span>
+      </div>
+
+      <div class="tasks" id="tasks">
+        <div class="empty-state">
+          Loading tasks...
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    TaskForge API &bull; Express &bull; File-based persistence
+  </footer>
 
   <script>
     async function loadTasks() {
-      const response = await fetch("/tasks");
-      const tasks = await response.json();
-
       const taskList = document.getElementById("tasks");
 
-      tasks.forEach((task) => {
-        const item = document.createElement("li");
+      try {
+        const response = await fetch("/tasks");
 
-        item.textContent = `${task.title || "No title"} - ${
-          task.complete ? "Complete" : "Not complete"
-        }`;
+        if (!response.ok) {
+          throw new Error("Unable to load tasks");
+        }
 
-        taskList.appendChild(item);
-      });
+        const tasks = await response.json();
+
+        const total = tasks.length;
+        const completed = tasks.filter((task) => task.complete).length;
+        const outstanding = total - completed;
+
+        const progress = total === 0
+          ? 0
+          : Math.round((completed / total) * 100);
+
+        document.getElementById("totalTasks").textContent = total;
+        document.getElementById("completedTasks").textContent = completed;
+        document.getElementById("outstandingTasks").textContent = outstanding;
+        document.getElementById("progressText").textContent = `${progress}%`;
+        document.getElementById("progressFill").style.width = `${progress}%`;
+
+        document.getElementById("taskCount").textContent =
+          `${total} ${total === 1 ? "task" : "tasks"}`;
+
+        taskList.innerHTML = "";
+
+        if (tasks.length === 0) {
+          taskList.innerHTML = `
+            <div class="empty-state">
+              No tasks available.
+            </div>
+          `;
+          return;
+        }
+
+        tasks.forEach((task) => {
+          const card = document.createElement("article");
+          card.className = "task-card";
+
+          const taskInfo = document.createElement("div");
+          taskInfo.className = "task-info";
+
+          const taskId = document.createElement("div");
+          taskId.className = "task-id";
+          taskId.textContent = `TASK-${task.id}`;
+
+          const title = document.createElement("div");
+          title.className = "task-title";
+          title.textContent = task.title || "No title";
+
+          const date = document.createElement("div");
+          date.className = "task-date";
+          date.textContent = task.createdAt
+            ? `Created ${new Date(task.createdAt).toLocaleDateString()}`
+            : "Creation date unavailable";
+
+          taskInfo.appendChild(taskId);
+          taskInfo.appendChild(title);
+          taskInfo.appendChild(date);
+
+          const badge = document.createElement("span");
+          badge.className = "badge";
+
+          if (!task.title) {
+            badge.classList.add("warning");
+            badge.textContent = "Missing title";
+          } else if (task.complete) {
+            badge.classList.add("complete");
+            badge.textContent = "Complete";
+          } else {
+            badge.classList.add("pending");
+            badge.textContent = "Outstanding";
+          }
+
+          card.appendChild(taskInfo);
+          card.appendChild(badge);
+
+          taskList.appendChild(card);
+        });
+
+      } catch (error) {
+        taskList.innerHTML = `
+          <div class="empty-state">
+            Unable to connect to the TaskForge API.
+          </div>
+        `;
+
+        console.error(error);
+      }
     }
 
     loadTasks();
   </script>
+
 </body>
 </html>

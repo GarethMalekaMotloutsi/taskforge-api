@@ -17,17 +17,17 @@ async function writeTasks(tasks) {
 }
 
 // GET /tasks
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const tasks = await readTasks();
     res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ message: "Could not read tasks" });
+    next(error);
   }
 });
 
 // GET /tasks/:id
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const tasks = await readTasks();
 
@@ -39,12 +39,12 @@ router.get("/:id", async (req, res) => {
 
     res.status(200).json(task);
   } catch (error) {
-    res.status(500).json({ message: "Could not read task" });
+    next(error);
   }
 });
 
 // GET /tasks/:id/verify
-router.get("/:id/verify", async (req, res) => {
+router.get("/:id/verify", async (req, res, next) => {
   try {
     const tasks = await readTasks();
 
@@ -59,9 +59,9 @@ router.get("/:id/verify", async (req, res) => {
     });
 
     if (!task.title) {
-      return res.status(400).json({
-        message: "Task is missing a title"
-      });
+      const error = new Error("Task is missing a title");
+      error.statusCode = 400;
+      return next(error);
     }
 
     res.status(200).json({
@@ -69,17 +69,19 @@ router.get("/:id/verify", async (req, res) => {
       task
     });
   } catch (error) {
-    res.status(500).json({ message: "Verification failed" });
+    next(error);
   }
 });
 
 // POST /tasks
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   try {
     const { title, complete } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: "Title is required" });
+      const error = new Error("Title is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const tasks = await readTasks();
@@ -97,12 +99,12 @@ router.post("/", async (req, res) => {
 
     res.status(201).json(newTask);
   } catch (error) {
-    res.status(500).json({ message: "Could not create task" });
+    next(error);
   }
 });
 
 // PUT /tasks/:id
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req, res, next) => {
   try {
     const tasks = await readTasks();
 
@@ -115,7 +117,9 @@ router.put("/:id", async (req, res) => {
     const { title, complete } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: "Title is required" });
+      const error = new Error("Title is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     task.title = title;
@@ -125,12 +129,12 @@ router.put("/:id", async (req, res) => {
 
     res.status(200).json(task);
   } catch (error) {
-    res.status(500).json({ message: "Could not update task" });
+    next(error);
   }
 });
 
 // DELETE /tasks/:id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const tasks = await readTasks();
 
@@ -146,7 +150,7 @@ router.delete("/:id", async (req, res) => {
 
     res.status(204).send();
   } catch (error) {
-    res.status(500).json({ message: "Could not delete task" });
+    next(error);
   }
 });
 
